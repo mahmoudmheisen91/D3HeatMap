@@ -44,17 +44,17 @@ let drawHeatMap = data => {
     bottom: 30,
     left: 175
   };
-  let timeFormat = d3.timeFormat("%b");
+  let timeFormat = d3.timeFormat("%B");
 
   // Scaleing:
   let xScale = d3
-    .scaleLinear()
-    .domain([d3.min(data, d => d.year), d3.max(data, d => d.year)])
+    .scaleBand()
+    .domain(data.map(item => item.year))
     .range([margin.right + margin.left, width - margin.right - margin.left]);
 
   let yScale = d3
     .scaleBand()
-    .domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    .domain(data.map(item => item.month))
     .range([height - margin.top - margin.bottom, margin.top + margin.bottom]);
 
   // Axes:
@@ -62,13 +62,19 @@ let drawHeatMap = data => {
     g
       .attr("id", "x-axis")
       .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
-      .call(d3.axisBottom(xScale).tickFormat(d3.format("d")))
+      .call(
+        d3
+          .axisBottom(xScale)
+          .tickFormat(d3.format("d"))
+          .tickValues(xScale.domain().filter(item => item % 10 == 0))
+          .tickSize(15, 1)
+      )
       .call(g =>
         g
           .append("text")
           .attr("class", "x-label")
           .attr("x", width - (margin.right + margin.left))
-          .attr("y", (margin.top + margin.bottom) * 0.75)
+          .attr("y", margin.top + margin.bottom)
           .text("Year")
       );
 
@@ -86,6 +92,7 @@ let drawHeatMap = data => {
             return timeFormat(date);
           })
           .tickValues(yScale.domain())
+          .tickSize(15, 1)
       )
       .call(g =>
         g
@@ -93,7 +100,7 @@ let drawHeatMap = data => {
           .attr("class", "y-label")
           .attr("transform", "rotate(-90)")
           .attr("x", -(margin.right + margin.left) * 0.5)
-          .attr("y", -(margin.top + margin.bottom) * 1.25)
+          .attr("y", -(margin.top + margin.bottom) * 2)
           .text("Month")
       );
 
@@ -104,40 +111,44 @@ let drawHeatMap = data => {
     .attr("id", "tooltip");
 
   // Main PLot:
-  //   let plot = g =>
-  //     g
-  //       .selectAll("rect")
-  //       .data(data)
-  //       .enter()
-  //       .append("rect")
-  //       .attr("class", "bar")
-  //       .attr("data-date", d => d.DateStr)
-  //       .attr("data-gdp", d => d.GDP)
-  //       .attr("x", d => xScale(d.Date))
-  //       .attr("y", d => yScale(d.GDP))
-  //       .attr("width", width / 275)
-  //       .attr("height", d => height - margin.top - margin.bottom - yScale(d.GDP))
-  //       .attr("fill", "none")
-  //       .on("mouseover", d => {
-  //         toolTip.style("display", "block");
-  //         toolTip.attr("data-date", d.DateStr);
-  //         toolTip
-  //           .html(
-  //             "Year: " +
-  //               d.Year +
-  //               " " +
-  //               d.QVAL +
-  //               "<br/>" +
-  //               "GDP: " +
-  //               d.GDP +
-  //               " Billion"
-  //           )
-  //           .style("left", d3.event.pageX + "px")
-  //           .style("top", d3.event.pageY - 28 + "px");
-  //       })
-  //       .on("mouseout", d => {
-  //         toolTip.style("display", "none");
-  //       });
+  let plot = g =>
+    g
+      .selectAll("rect")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("class", "cell")
+      .attr("data-month", d => d.month)
+      .attr("data-year", d => d.year)
+      .attr("data-temp", d => d.temp)
+      .attr("x", d => xScale(d.year))
+      .attr(
+        "y",
+        d => height - margin.top - margin.bottom - yScale(d.month) + 12
+      )
+      .attr("width", d => width / 262)
+      .attr("height", d => height / 12 - 12)
+      .attr("fill", "none")
+      .on("mouseover", function(d) {
+        let date = new Date(d.year, d.month);
+        toolTip
+          .style("display", "block")
+          .attr("data-year", d.year)
+          .html(
+            d3.timeFormat("%B, %Y")(date) +
+              "<br/>" +
+              "Temperature: " +
+              d.temp +
+              "<br/>" +
+              "Variance: " +
+              d.variance
+          )
+          .style("left", d3.event.pageX + 20 + "px")
+          .style("top", d3.event.pageY - 45 + "px");
+      })
+      .on("mouseout", d => {
+        toolTip.style("display", "none");
+      });
 
   // Title:
   let title = g =>
@@ -148,6 +159,17 @@ let drawHeatMap = data => {
         .attr("x", width / 2)
         .attr("y", (margin.top + margin.bottom) / 2)
         .text("Monthly Global Land-Surface Temperature")
+    );
+
+  // Description:
+  let description = g =>
+    g.call(g =>
+      g
+        .append("text")
+        .attr("id", "description")
+        .attr("x", width / 2)
+        .attr("y", (margin.top + margin.bottom) / 2 + 20)
+        .text("Base Temperature: 8.66 Cel")
     );
 
   // Create SVG:
@@ -161,6 +183,7 @@ let drawHeatMap = data => {
   // Append:
   svg.append("g").call(xAxis);
   svg.append("g").call(yAxis);
-  //   svg.append("g").call(plot);
+  svg.append("g").call(plot);
   svg.append("g").call(title);
+  svg.append("g").call(description);
 };

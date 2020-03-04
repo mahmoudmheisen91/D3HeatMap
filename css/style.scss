@@ -44,7 +44,7 @@ footer {
 #x-axis,
 #y-axis {
   stroke: $axis-color;
-  stroke-width: 0.5px;
+  stroke-width: 1px;
   font-size: 1rem;
 }
 
@@ -54,7 +54,7 @@ footer {
   text-anchor: end;
   font-size: 1.25rem;
   color: $axis-color;
-  letter-spacing: 3px;
+  letter-spacing: 5px;
 }
 
 .grid-line {
@@ -65,7 +65,8 @@ footer {
 
 #tooltip {
   position: absolute;
-  max-width: 250px;
+  max-width: 150px;
+  min-width: 150px;
   word-wrap: break-word;
   display: none;
   padding: 12px;
@@ -75,18 +76,24 @@ footer {
   pointer-events: none;
 }
 
-.bar {
+.cell {
   fill: $bar-color;
   stroke: white;
   stroke-width: 0.5px;
 }
 
-.bar:hover {
+.cell:hover {
   fill: $hover-color;
 }
 
 #title {
   font-size: 1.5rem;
+  font-weight: bold;
+  text-anchor: middle;
+}
+
+#description {
+  font-size: 1.25rem;
   font-weight: bold;
   text-anchor: middle;
 }
