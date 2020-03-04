@@ -45,14 +45,16 @@ footer {
 #y-axis {
   stroke: $axis-color;
   stroke-width: 0.5px;
+  font-size: 1rem;
 }
 
 .x-label,
 .y-label {
   fill: currentColor;
   text-anchor: end;
-  font-size: 0.8rem;
+  font-size: 1.25rem;
   color: $axis-color;
+  letter-spacing: 3px;
 }
 
 .grid-line {

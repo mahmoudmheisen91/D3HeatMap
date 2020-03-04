@@ -39,14 +39,16 @@ footer {
 #y-axis {
   stroke: #16014e;
   stroke-width: 0.5px;
+  font-size: 1rem;
 }
 
 .x-label,
 .y-label {
   fill: currentColor;
   text-anchor: end;
-  font-size: 0.8rem;
+  font-size: 1.25rem;
   color: #16014e;
+  letter-spacing: 3px;
 }
 
 .grid-line {
