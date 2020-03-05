@@ -36,16 +36,30 @@ let parseData = data => {
  */
 let drawHeatMap = data => {
   // Globals:
-  const width = 1800;
-  const height = 700;
+  const cell_width = 8;
+  const cell_height = 80;
+  const width = (cell_width + 1) * Math.ceil(data.length / 12);
+  const height = (cell_height + 10) * 12;
   const margin = {
-    top: 30,
-    right: 0,
-    bottom: 30,
+    top: 40,
+    right: 30,
+    bottom: 40,
     left: 175
   };
   let timeFormat = d3.timeFormat("%B");
-
+  let colors = [
+    "#a50026",
+    "#d73027",
+    "#f46d43",
+    "#fdae61",
+    "#fee08b",
+    "#ffffbf",
+    "#d9ef8b",
+    "#a6d96a",
+    "#66bd63",
+    "#1a9850",
+    "#006837"
+  ].reverse();
   // Scaleing:
   let xScale = d3
     .scaleBand()
@@ -56,6 +70,11 @@ let drawHeatMap = data => {
     .scaleBand()
     .domain(data.map(item => item.month))
     .range([height - margin.top - margin.bottom, margin.top + margin.bottom]);
+
+  let colorScale = d3
+    .scaleThreshold()
+    .domain(data.map(item => item.temp))
+    .range(colors);
 
   // Axes:
   let xAxis = g =>
@@ -100,7 +119,7 @@ let drawHeatMap = data => {
           .attr("class", "y-label")
           .attr("transform", "rotate(-90)")
           .attr("x", -(margin.right + margin.left) * 0.5)
-          .attr("y", -(margin.top + margin.bottom) * 2)
+          .attr("y", -(margin.top + margin.bottom) * 1.75)
           .text("Month")
       );
 
@@ -118,19 +137,17 @@ let drawHeatMap = data => {
       .enter()
       .append("rect")
       .attr("class", "cell")
-      .attr("data-month", d => d.month)
+      .attr("data-month", d => d.month - 1)
       .attr("data-year", d => d.year)
       .attr("data-temp", d => d.temp)
       .attr("x", d => xScale(d.year))
-      .attr(
-        "y",
-        d => height - margin.top - margin.bottom - yScale(d.month) + 12
-      )
-      .attr("width", d => width / 262)
-      .attr("height", d => height / 12 - 12)
-      .attr("fill", "none")
+      .attr("y", d => yScale(d.month))
+      .attr("width", cell_width)
+      .attr("height", cell_height)
+      .attr("fill", d => colorScale(d.temp))
       .on("mouseover", function(d) {
-        let date = new Date(d.year, d.month);
+        let date = new Date(d.year, d.month - 1);
+        let temp = Math.round((d.temp + Number.EPSILON) * 100) / 100;
         toolTip
           .style("display", "block")
           .attr("data-year", d.year)
@@ -138,7 +155,7 @@ let drawHeatMap = data => {
             d3.timeFormat("%B, %Y")(date) +
               "<br/>" +
               "Temperature: " +
-              d.temp +
+              temp +
               "<br/>" +
               "Variance: " +
               d.variance
@@ -168,7 +185,7 @@ let drawHeatMap = data => {
         .append("text")
         .attr("id", "description")
         .attr("x", width / 2)
-        .attr("y", (margin.top + margin.bottom) / 2 + 20)
+        .attr("y", (margin.top + margin.bottom) / 2 + 30)
         .text("Base Temperature: 8.66 Cel")
     );
 
@@ -177,6 +194,7 @@ let drawHeatMap = data => {
     .select(".vis-container")
     .append("svg")
     .attr("class", "svg-graph")
+    .attr("viewBox", [0, 0, width, height])
     .attr("viewBox", [0, 0, width, height])
     .attr("preserveAspectRatio", "xMidYMid meet");
 

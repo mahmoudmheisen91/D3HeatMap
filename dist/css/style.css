@@ -15,10 +15,11 @@ footer {
   margin: 5px;
   padding: 5px;
   border-radius: 10px;
-  background-color: #01eeff;
+  background-color: rgba(11, 13, 97, 0.767);
   text-align: center;
   font-size: 1.5rem;
   font-weight: bold;
+  color: wheat;
 }
 
 footer {
@@ -37,22 +38,22 @@ footer {
 
 #x-axis,
 #y-axis {
-  stroke: #16014e;
+  stroke: black;
   stroke-width: 1px;
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .x-label,
 .y-label {
   fill: currentColor;
   text-anchor: end;
-  font-size: 1.25rem;
-  color: #16014e;
+  font-size: 1.5rem;
+  color: #0b0d61;
   letter-spacing: 5px;
 }
 
 .grid-line {
-  stroke: #16014e;
+  stroke: black;
   stroke-dashoffset: 1px;
   opacity: 0.5;
 }
@@ -65,29 +66,30 @@ footer {
   display: none;
   padding: 12px;
   font-size: 16px;
-  background: #ff4931;
+  background: rgba(11, 13, 97, 0.767);
   border-radius: 10px;
   pointer-events: none;
+  color: wheat;
 }
 
 .cell {
-  fill: #5a5a5a;
-  stroke: white;
-  stroke-width: 0.5px;
+  opacity: 1;
 }
 
 .cell:hover {
-  fill: #ff2f0a;
+  stroke: black;
+  stroke-width: 1px;
+  fill: rgba(11, 13, 97, 0.767);
 }
 
 #title {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bold;
   text-anchor: middle;
 }
 
 #description {
-  font-size: 1.25rem;
+  font-size: 1.75rem;
   font-weight: bold;
   text-anchor: middle;
 }
