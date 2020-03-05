@@ -43,14 +43,16 @@ footer {
 }
 
 #x-axis,
-#y-axis {
+#y-axis,
+#legend-axis {
   stroke: $axis-color;
   stroke-width: 1px;
   font-size: 1.25rem;
 }
 
 .x-label,
-.y-label {
+.y-label,
+.legend-label {
   fill: currentColor;
   text-anchor: end;
   font-size: 1.5rem;

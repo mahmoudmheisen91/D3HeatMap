@@ -37,9 +37,11 @@ let parseData = data => {
 let drawHeatMap = data => {
   // Globals:
   const cell_width = 8;
-  const cell_height = 80;
+  const cell_height = 90;
   const width = (cell_width + 1) * Math.ceil(data.length / 12);
   const height = (cell_height + 10) * 12;
+  const legend_width = 50;
+  const legend_height = 70 * 11;
   const margin = {
     top: 40,
     right: 30,
@@ -60,6 +62,7 @@ let drawHeatMap = data => {
     "#1a9850",
     "#006837"
   ].reverse();
+
   // Scaleing:
   let xScale = d3
     .scaleBand()
@@ -71,9 +74,24 @@ let drawHeatMap = data => {
     .domain(data.map(item => item.month))
     .range([height - margin.top - margin.bottom, margin.top + margin.bottom]);
 
+  let legendScale = d3
+    .scaleLinear()
+    .domain([d3.min(data, d => d.temp), d3.max(data, d => d.temp)])
+    .range([margin.top + margin.bottom, legend_height]);
+
+  let colorDomain = (min, max) => {
+    let step = (max - min) / colors.length;
+    return [...new Array(10)].map((_, index) => min + (index + 1) * step);
+  };
+
   let colorScale = d3
     .scaleThreshold()
-    .domain(data.map(item => item.temp))
+    .domain(
+      colorDomain(
+        d3.min(data, d => d.temp),
+        d3.max(data, d => d.temp)
+      )
+    )
     .range(colors);
 
   // Axes:
@@ -122,6 +140,49 @@ let drawHeatMap = data => {
           .attr("y", -(margin.top + margin.bottom) * 1.75)
           .text("Month")
       );
+
+  let legendAxis = g =>
+    g
+      .attr("id", "legend-axis")
+      .attr("transform", `translate(${width - margin.right * 4}, ${50})`)
+      .call(
+        d3
+          .axisLeft(legendScale)
+          .tickFormat(d3.format("0.2f"))
+          .tickValues(colorScale.domain())
+          .tickSize(15, 1)
+      )
+      .call(g =>
+        g
+          .append("text")
+          .attr("class", "legend-label")
+          .attr("x", margin.right + 40)
+          .attr("y", margin.top + 20)
+          .text("Legend")
+      );
+
+  // Legend
+  var legend = g =>
+    g
+      .attr("id", "legend")
+      .attr("transform", `translate(${width - margin.right * 4 - 10}, ${50})`)
+      .selectAll("rect")
+      .data(
+        colorScale.range().map(color => {
+          let d = colorScale.invertExtent(color);
+          if (d[0] == null) d[0] = legendScale.domain()[0];
+          if (d[1] == null) d[1] = legendScale.domain()[1];
+          return d;
+        })
+      )
+      .enter()
+      .append("rect")
+      .attr("x", 10)
+      .attr("y", d => legendScale(d[0]))
+      .attr("width", legend_width)
+      .attr("height", legend_height / 11 - 5)
+      .style("fill", d => colorScale(d[0]))
+      .style("stroke", "black");
 
   // ToolTip:
   let toolTip = d3
@@ -174,7 +235,7 @@ let drawHeatMap = data => {
         .append("text")
         .attr("id", "title")
         .attr("x", width / 2)
-        .attr("y", (margin.top + margin.bottom) / 2)
+        .attr("y", (margin.top + margin.bottom) / 3)
         .text("Monthly Global Land-Surface Temperature")
     );
 
@@ -185,7 +246,7 @@ let drawHeatMap = data => {
         .append("text")
         .attr("id", "description")
         .attr("x", width / 2)
-        .attr("y", (margin.top + margin.bottom) / 2 + 30)
+        .attr("y", (margin.top + margin.bottom) / 2 + 25)
         .text("Base Temperature: 8.66 Cel")
     );
 
@@ -201,6 +262,8 @@ let drawHeatMap = data => {
   // Append:
   svg.append("g").call(xAxis);
   svg.append("g").call(yAxis);
+  svg.append("g").call(legendAxis);
+  svg.append("g").call(legend);
   svg.append("g").call(plot);
   svg.append("g").call(title);
   svg.append("g").call(description);
